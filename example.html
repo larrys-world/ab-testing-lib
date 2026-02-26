@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A/B Testing Example - Tax Calculator</title>
+  
+  <!-- Google Analytics (replace with your ID) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_MEASUREMENT_ID');
+  </script>
+  
+  <!-- A/B Testing Library -->
+  <script src="ab-test.js"></script>
+  
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .ad-slot { 
+      background: #f0f0f0; 
+      border: 2px dashed #ccc; 
+      padding: 20px; 
+      margin: 20px 0; 
+      text-align: center;
+    }
+    .calculator { 
+      background: #fff; 
+      border: 1px solid #ddd; 
+      padding: 20px; 
+      margin: 20px 0;
+    }
+    .high-contrast { background: #000; color: #fff; }
+    .high-contrast .calculator { background: #222; border-color: #444; }
+    .high-contrast .ad-slot { background: #333; border-color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Tax Calculator with A/B Testing</h1>
+  
+  <div id="ad-top" class="ad-slot" style="display: none;">
+    <p>Ad Slot - Above the Fold</p>
+  </div>
+  
+  <div class="calculator">
+    <h2>Calculate Your Taxes</h2>
+    <p>Income: <input type="number" id="income" value="50000"></p>
+    <p>Tax Rate: <input type="number" id="rate" value="25">%</p>
+    <button onclick="calculate()">Calculate</button>
+    <p id="result"></p>
+  </div>
+  
+  <div id="ad-middle" class="ad-slot">
+    <p>Ad Slot - Middle</p>
+  </div>
+  
+  <div id="content">
+    <h2>Tax Information</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+  </div>
+  
+  <div id="ad-bottom" class="ad-slot">
+    <p>Ad Slot - Bottom</p>
+  </div>
+  
+  <div id="ad-extra" class="ad-slot" style="display: none;">
+    <p>Ad Slot - Extra (4th ad)</p>
+  </div>
+  
+  <!-- Debug Panel -->
+  <div style="position: fixed; bottom: 10px; right: 10px; background: #fff; border: 1px solid #ccc; padding: 10px; font-size: 12px;">
+    <h4>A/B Test Debug</h4>
+    <div id="debug-info"></div>
+    <button onclick="abTest.clearTests(); location.reload();">Reset Tests</button>
+  </div>
+  
+  <script>
+    // Initialize A/B Testing
+    const abTest = new ABTest({
+      debug: true,
+      tests: {
+        'ad_placement': {
+          variants: [
+            { name: 'control', weight: 50 },     // 3 ads below fold
+            { name: 'above_fold', weight: 50 }   // 1 ad above fold
+          ]
+        },
+        'ad_count': {
+          variants: [
+            { name: 'three_ads', weight: 50 },   // 3 ads total
+            { name: 'four_ads', weight: 50 }     // 4 ads total
+          ]
+        },
+        'color_scheme': {
+          variants: [
+            { name: 'default', weight: 50 },     // Normal colors
+            { name: 'high_contrast', weight: 50 } // High contrast
+          ]
+        }
+      }
+    });
+    
+    // Apply ad placement test
+    abTest.apply('ad_placement', {
+      'control': () => {
+        // Keep default: all ads below fold
+      },
+      'above_fold': () => {
+        // Show one ad above fold
+        document.getElementById('ad-top').style.display = 'block';
+        document.getElementById('ad-middle').style.display = 'none';
+      }
+    });
+    
+    // Apply ad count test
+    abTest.apply('ad_count', {
+      'three_ads': () => {
+        // Keep default: 3 ads
+      },
+      'four_ads': () => {
+        // Show 4th ad
+        document.getElementById('ad-extra').style.display = 'block';
+      }
+    });
+    
+    // Apply color scheme test
+    abTest.apply('color_scheme', {
+      'default': () => {
+        // Keep default colors
+      },
+      'high_contrast': () => {
+        // Apply high contrast theme
+        document.body.classList.add('high-contrast');
+      }
+    });
+    
+    // Track page view with variants
+    abTest.track('page_view', {
+      page: 'tax_calculator'
+    });
+    
+    // Calculator function
+    function calculate() {
+      const income = parseFloat(document.getElementById('income').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const tax = income * (rate / 100);
+      
+      document.getElementById('result').innerHTML = 
+        `Tax: $${tax.toFixed(2)}<br>Take-home: $${(income - tax).toFixed(2)}`;
+      
+      // Track calculation as conversion
+      abTest.track('calculation_completed', {
+        income: income,
+        rate: rate
+      });
+    }
+    
+    // Simulate ad clicks
+    document.querySelectorAll('.ad-slot').forEach(ad => {
+      ad.addEventListener('click', () => {
+        abTest.track('ad_click', {
+          ad_position: ad.id
+        });
+        alert('Ad clicked! (In production, this would open the ad)');
+      });
+    });
+    
+    // Update debug info
+    function updateDebug() {
+      const summary = abTest.getTestSummary();
+      document.getElementById('debug-info').innerHTML = 
+        Object.entries(summary)
+          .map(([test, variant]) => `${test}: <b>${variant}</b>`)
+          .join('<br>');
+    }
+    
+    updateDebug();
+  </script>
+</body>
+</html>

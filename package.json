@@ -1,0 +1,37 @@
+{
+  "name": "@larrys-world/ab-test",
+  "version": "1.0.0",
+  "description": "Lightweight A/B testing library for static sites and revenue optimization",
+  "main": "ab-test.js",
+  "files": [
+    "ab-test.js",
+    "ab-test.min.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "minify": "terser ab-test.js -o ab-test.min.js -c -m"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/larrys-world/ab-testing-lib.git"
+  },
+  "keywords": [
+    "ab-testing",
+    "split-testing",
+    "optimization",
+    "static-site",
+    "analytics",
+    "conversion",
+    "revenue"
+  ],
+  "author": "Larry's World",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/larrys-world/ab-testing-lib/issues"
+  },
+  "homepage": "https://github.com/larrys-world/ab-testing-lib#readme",
+  "devDependencies": {
+    "terser": "^5.31.0"
+  }
+}
